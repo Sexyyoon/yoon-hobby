@@ -1,0 +1,53 @@
+import random
+
+def randint_exclude(start, end, exclude_list):
+    running = True
+    while running:
+        a = random.randint(start, end - 1)
+        if a not in exclude_list:
+            running = False
+            return a
+
+def drunk_simul(n_ppl=10, n_simul=10000):
+  lucky_for_last_guy = 0
+  exclude_list = []
+
+  for _ in range(n_simul):
+      # Let's say the first drunken guy already got in and there's n-1 seats.
+      available_seats = list(range(n_ppl))
+      r1 = random.choice(available_seats)
+      available_seats.remove(r1)
+
+      passengers = list(range(n_ppl))
+      r2 = random.choice(passengers)
+      passengers.remove(r2)
+      random.shuffle(passengers)  # Further shuffle the passenger list
+
+      for passenger in passengers:
+          if passenger == n_ppl-1 and n_ppl-1 in available_seats:
+              lucky_for_last_guy += 1  # Hooray!
+              break
+          else:
+              # this passenger is not the last guy (n-1), but this guy's seat is not taken by some dude
+              if passenger in available_seats:
+                  available_seats.remove(passenger)
+              # And this is the case this guy's seat was taken. Here comes chaos...
+              else:
+                  new_seat = randint_exclude(0, n_ppl-1, passenger)
+                  while new_seat not in available_seats:
+                      new_seat = randint_exclude(0, n_ppl-1, passenger)
+                  available_seats.remove(new_seat)
+
+              exclude_list.append(passenger)
+
+              if len(available_seats) == 1:
+                  # Okay. last guy couldn't get his seat.
+                  break
+
+
+  prob_lucky_over_simul = lucky_for_last_guy / n_simul
+  return prob_lucky_over_simul
+
+
+a = drunk_simul()
+a
